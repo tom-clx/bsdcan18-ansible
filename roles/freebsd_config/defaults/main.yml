@@ -1,0 +1,13 @@
+---
+
+# Packages that should be installed on all FreeBSD hosts.
+global_packages:
+  - "vim-console"
+  - "screen"
+  - "curl"
+  - "rsync"
+  - "mtr-nox11"
+  - "python3"
+  - "perl5"
+
+# vim: set ts=2 sw=2 tw=80 ft=yaml :

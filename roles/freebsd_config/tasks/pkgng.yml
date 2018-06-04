@@ -1,0 +1,21 @@
+---
+
+- name: Install global packages
+  with_items: "{{ global_packages }}"
+  pkgng:
+    name: "{{ item }}"
+    state: present
+
+- name: Install group packages
+  with_items: "{{ group_packages|default([]) }}"
+  pkgng:
+    name: "{{ item }}"
+    state: present
+
+- name: Install host packages
+  with_items: "{{ host_packages|default([]) }}"
+  pkgng:
+    name: "{{ item }}"
+    state: present
+
+# vim: set ts=2 sw=2 tw=80 ft=yaml :

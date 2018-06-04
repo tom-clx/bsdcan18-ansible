@@ -1,0 +1,19 @@
+---
+# This file should be included ONLY when the stem cell zvol is imported on the
+# host. It handles the initial bootstrap of the routing daemon.
+
+- name: Copy bird package
+  with_items:
+    - "bird-1.6.4.txz"
+    - "bird6-1.6.4.txz"
+  copy:
+    src: "/pkg/deploy/{{ item }}"
+    dest: "{{ dst_pfx }}/tmp/"
+
+- name: Install BIRD using remote chroot script
+  with_items:
+    - "bird-1.6.4.txz"
+    - "bird6-1.6.4.txz"
+  script: "lib/rchroot.sh {{ dst_pfx }} pkg install -y /tmp/{{ item }}"
+
+# vim: set ts=2 sw=2 tw=80 ft=yaml :

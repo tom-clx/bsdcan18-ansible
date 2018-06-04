@@ -1,0 +1,18 @@
+---
+
+ansible_root_pubkey: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILl2UVB3GuzFupFlM31NznIH+t8pKnUUtO2CxoSIU0pa root@pzansible
+"
+
+user_accounts:
+  tom:
+    uid: "1027"
+    real_name: "Thomas Johnson"
+    shell: "/bin/csh"
+    push_config_dir: True
+    pubkeys:
+      - "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAgEA5ajAlN8/iIDutwpk97/5Tm6YClAGyRwmNO6TCL+JUV0vvdUyiQ+ircV7IKt2LV2WWmCR4T2RheldVj75VI9geIa7r/lNhYJTLfYYnYmTST/qZD5dKbPk1SLYvDtrQRFDOUca01u4W8YFxb6r5tSKU2A5Q9ecPQyyfNBl9fExLeOJIQ96zXdtOYcRXvYGz7GJ1HZSzZCDoEunPXk/ikqOWCduTjR9h8s3tftU8p4B7w/Jjhpl7Q6hIY18ee6N52jEIRf5vsRlQ9rmqZRRfMfF6iHenMH0qEjmpv/enHl6ZGvVFy/a0oQc41U8Q2/UWt1PXiQbIw77BMIrW9aw9OzGfx9y0ww+CIIPReyTrIR/yno7Iq7+E2hmGpkivCiSB2DtFyy0ASHjIi4kbdObAQKK38wdkbuNtL0eXkWChzrzIe4HtDYIXQ+O77nLEjIqF7q87VrvPIEeOswuRsHT1UjbWQ2NoChdRL/O0qbmFS0TJoemdfgGm37eqeNIsSy/1U0wdePJ7iRR/clZoLd8x9Y2+OH9e+99ULgzAV0cM4+Pl34EwswjbQr/Gr/qVpt6vb7Rj/UX4LUhEpQaYW5uotw2CN9WonGCA1GsJaf6LXvcD8hToQLboU/GP238RXYu0ip1Ayc7eD7+4i7bimVczYUqJmGWaVrpQDjlsPP0aJLAtxM= tom@raar"
+      - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHI21h69EjQGtE5NbvqCeGkQAZNou/xpci6hXLWIJqbl tom@sticky"
+
+# vim: set ts=2 sw=2 tw=80 ft=yaml :
+    
+  

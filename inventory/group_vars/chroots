@@ -1,0 +1,9 @@
+---
+# Not currently used, but this is the trick for making a LOCAL chroot work. A
+# pseudo-host also needs to exist in inventory. My clever idea that didn't
+# immediately pan out is to add_host the chroot into this group, but I was
+# trying to do a REMOTE chroot, which appears to not be supported. Maybe NFS?
+
+ansible_connection: chroot
+
+# vim: set ts=2 sw=2 tw=80 ft=yaml :

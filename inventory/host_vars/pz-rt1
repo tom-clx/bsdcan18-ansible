@@ -1,0 +1,80 @@
+---
+
+host_conf: "{{ conf_root }}/rt01"
+allowed_users:
+  - "tom"
+
+loader_conf: "stem"
+rc_conf: "stem"
+
+ipv4_loopback: "10.70.35.2"
+ipv6_loopback: "fd00:20:ffff::2"
+ansible_host: "{{ ipv6_loopback }}"
+
+network:
+  netif:
+    - name: "lo1"
+      clone: True
+      ipv4_addr: "{{ ipv4_loopback }}"
+      ipv4_plen: "32"
+      ipv6_addr: "{{ ipv6_loopback }}"
+      ipv6_plen: "128"
+      ospf: "stub"
+    - name: "vtnet0"
+      index: 0
+      ipv4_addr: "10.70.32.2"
+      ipv4_plen: "24"
+      host_switch: "gateway"
+      ipv6_addr: "fd00:20::2"
+      ospf: "normal"
+    - name: "vtnet1"
+      index: 1
+      ipv4_addr: "10.128.0.2"
+      ipv4_plen: "30"
+      host_switch: "ptp0"
+      ipv6_addr: "fd00:8::1"
+      ipv6_plen: "127"
+      ospf: "stub"
+    - name: "vtnet2"
+      index: 2
+      ipv4_addr: "10.200.255.2"
+      ipv4_plen: "30"
+      host_switch: "ptp4"
+      ipv6_addr: "fd00:c8:ff00::1"
+      ipv6_plen: "127"
+      ospf: "stub"
+  bird:
+    asn: "99999"
+    ipv4_host_includes:
+      - "/usr/local/etc/bird/defgw_hax.conf"
+    bgp:
+      # TODO: Prefixes could be abstracted to the AS levelas an Ansible group?
+      ipv4_static_prefixes:
+        - "10.70.32.0/22"
+        - "0.0.0.0/1"
+        - "128.0.0.0/1"
+      ipv6_static_prefixes:
+        - "fd00:20::/32"
+      ipv4_ebgp_sessions:
+        - name: "bgp_as50"
+          neighborip: "10.128.0.1"
+          neighboras: "50"
+        - name: "bgp_as200"
+          neighborip: "10.200.255.1"
+          neighboras: "200"
+      ipv6_ebgp_sessions:
+        - name: "bgp_as50"
+          neighborip: "fd00:8::"
+          neighboras: "50"
+        - name: "bgp_as200"
+          neighborip: "fd00:c8:ff00::"
+          neighboras: "200"
+      ibgp_sessions:
+        - name: "ibgp_pzansible"
+          neighborip6: "fd00:20:ffff::3"
+          neighborip4: "10.70.35.3"
+        - name: "ibgp_pzgateway"
+          neighborip6: "fd00:20:ffff::1"
+          neighborip4: "10.70.35.1"
+
+# vim: set ts=2 sw=2 tw=80 ft=yaml :

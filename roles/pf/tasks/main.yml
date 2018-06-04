@@ -1,0 +1,14 @@
+---
+
+- name: Template host pf.conf
+  when:
+    - "'pf' in group_names"
+  template:
+    src: "{{ host_conf }}/etc/pf.conf.tpl"
+    dest: "{{ dst_pfx|default('') }}/etc/pf.conf"
+    backup: yes
+    mode: "0644"
+    owner: "root"
+    group: "wheel"
+
+# vim: set ts=2 sw=2 tw=80 ft=yaml :

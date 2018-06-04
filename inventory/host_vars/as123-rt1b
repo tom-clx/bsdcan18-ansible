@@ -1,0 +1,65 @@
+---
+
+host_conf: "{{ conf_root }}/rt01"
+allowed_users:
+  - "tom"
+
+loader_conf: "stem"
+rc_conf: "stem"
+
+ipv4_loopback: "10.123.2.1"
+ipv6_loopback: "fd00:7b:2::1"
+ansible_host: "{{ ipv6_loopback }}"
+
+network:
+  netif:
+    - name: "lo1"
+      clone: True
+      ipv4_addr: "{{ ipv4_loopback }}"
+      ipv4_plen: "32"
+      ipv6_addr: "{{ ipv6_loopback }}"
+      ipv6_plen: "128"
+      ospf: "stub"
+    - name: "vtnet0"
+      index: 0
+      ipv4_addr: "10.123.2.10"
+      ipv4_plen: "29"
+      host_switch: "as123-sw2"
+      ipv6_addr: "fd00:7b:2:8::10"
+      carp_def: "vhid 7 pass as123b"
+      carp_ipv4: "10.123.2.9"
+      carp_ipv6: "fd00:7b:2:8::9"
+      ospf: "normal"
+    - name: "vtnet1"
+      index: 1
+      ipv4_addr: "10.128.0.10"
+      ipv4_plen: "30"
+      host_switch: "ptp7"
+      ipv6_addr: "fd00:8:2::1"
+      ipv6_plen: "127"
+      ospf: "stub"
+  bird:
+    asn: "123"
+    bgp:
+      allow_myas: True
+      # These defined in site and as-level group_vars.
+      ipv4_static_prefixes: "{{ ipv4_static_prefixes }}"
+      ipv6_static_prefixes: "{{ ipv6_static_prefixes }}"
+      ipv4_portable_prefixes: "{{ ipv4_portable_prefixes }}"
+      ipv6_portable_prefixes: "{{ ipv6_portable_prefixes }}"
+      ipv4_portable_internal_routes: "{{ ipv4_portable_internal_routes }}"
+      ipv6_portable_internal_routes: "{{ ipv6_portable_internal_routes }}"
+      ipv4_ebgp_sessions:
+        - name: "bgp_as50"
+          neighborip: "10.128.0.9"
+          neighboras: "50"
+      ipv6_ebgp_sessions:
+        - name: "bgp_as50"
+          neighborip: "fd00:8:2::"
+          neighboras: "50"
+      ibgp_sessions:
+        - name: "ibgp_rt2b"
+          neighborip6: "fd00:7b:2::2"
+          neighborip4: "10.123.2.2"
+
+# vim: set ts=2 sw=2 tw=80 ft=yaml :

@@ -1,0 +1,22 @@
+---
+
+- hosts: bhyve_hosts
+  gather_facts: no
+
+  roles:
+    - { role: bhyve_switch_prep, tags: "bhyve,switch"}
+    - { role: bhyve_host_prep, tags: bhyve }
+
+- hosts: bhyve_guests
+  gather_facts: no
+
+  # This needs to be run serially. When the guest zvol is cloned, it retains the
+  # guid of the source pool. ZFS only allows a single imported instance of a
+  # given guid, so all guest clones after the first will fail. zpool reguid can
+  # be used to change a zpool, but doesn't seem practical right now.
+  serial: 1
+
+  roles:
+    - { role: vm_prep, tags: vm }
+
+# vim: set ts=2 sw=2 tw=80 ft=yaml :

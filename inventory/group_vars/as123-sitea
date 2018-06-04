@@ -1,0 +1,11 @@
+---
+
+location: "a"
+ipv4_fw_outside: "10.123.1.12"
+ipv6_fw_outside: "fd00:7b:1:8::12"
+ipv4_static_prefixes:
+  - "10.123.1.0/24"
+ipv6_static_prefixes:
+  - "fd00:7b:1::/48"
+
+# vim: set ts=2 sw=2 tw=80 ft=yaml :

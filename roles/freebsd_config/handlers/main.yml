@@ -1,0 +1,8 @@
+---
+
+- name: Restart syslogd
+  service:
+    name: syslogd
+    state: restarted
+
+# vim: set ts=2 sw=2 tw=80 ft=yaml :

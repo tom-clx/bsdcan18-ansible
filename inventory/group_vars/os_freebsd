@@ -1,0 +1,4 @@
+---
+ansible_python_interpreter: "/usr/bin/env python3"
+
+# vim: set ts=2 sw=2 tw=80 filetype=yaml :

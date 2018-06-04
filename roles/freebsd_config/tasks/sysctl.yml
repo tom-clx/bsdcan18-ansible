@@ -1,0 +1,15 @@
+---
+
+- name: Template host sysctl.conf
+  when:
+    - sysctl_conf is defined
+    - sysctl_conf == 'host'
+  template:
+    src: "{{ host_conf }}/etc/sysctl.conf"
+    dest: "/etc/sysctl.conf"
+    backup: yes
+    mode: "0644"
+    owner: "root"
+    group: "wheel"
+
+# vim: set ts=2 sw=2 tw=80 ft=yaml :

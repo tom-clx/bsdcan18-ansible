@@ -1,0 +1,63 @@
+---
+
+- name: Verify common directories
+  with_items:
+    - "{{ dst_pfx|default('') }}/usr/local/etc/bird"
+  file:
+    path: "{{ item }}"
+    state: directory
+
+- name: Template stem cell bird.conf
+  with_items: "{{ bird_names }}"
+  when:
+    - bird_conf is defined
+    - bird_conf == 'stem'
+  template:
+    src: "{{ stem_root }}/usr/local/etc/{{ item }}.conf"
+    dest: "{{ dst_pfx|default('') }}/usr/local/etc/{{ item }}.conf"
+    backup: yes
+    mode: "0644"
+    owner: "root"
+    group: "wheel"
+  notify:
+    - Reconfig birds
+
+# This is not used in the demo network, but it's here as an example of how a
+# host could be configured to use a tailored config template.
+#- name: Template host bird.conf
+#  with_items: "{{ bird_names }}"
+#  when:
+#    - bird_conf is defined
+#    - bird_conf == 'host'
+#  template:
+#    src: "{{ host_conf }}/usr/local/etc/{{ item }}.conf"
+#    dest: "{{ dst_pfx|default('') }}/usr/local/etc/{{ item }}.conf"
+#    backup: yes
+#    mode: "0644"
+#    owner: "root"
+#    group: "wheel"
+#  notify:
+#    - Reconfig birds
+
+- name: Template bird BGP common files
+  with_items: "{{ bird_names }}"
+  template:
+    src: "{{ stem_root }}/usr/local/etc/bird/{{ item }}-bgp-common.conf.tpl"
+    dest: "{{ dst_pfx|default('') }}/usr/local/etc/bird/{{ item }}-bgp-common.conf"
+    backup: yes
+  notify:
+    - Reconfig birds
+
+- name: Template any host-specific include files
+  with_items: "{{ network.bird.ipv4_host_includes|default([]) + network.bird.ipv6_host_includes|default([])}}"
+  template:
+    src: "{{ host_conf }}{{ item }}"
+    dest: "{{ dst_pfx|default('') }}{{ item }}"
+    backup: yes
+    mode: "0644"
+    owner: "root"
+    group: "wheel"
+  notify:
+    - Reconfig birds
+
+# vim: set ts=2 sw=2 tw=80 ft=yaml :

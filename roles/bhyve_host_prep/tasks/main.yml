@@ -1,0 +1,19 @@
+---
+
+- name: Create /root/bin
+  file:
+    path: "/root/bin/"
+    state: directory
+    mode: "0750"
+    owner: "root"
+    group: "wheel"
+
+- name: Copy nasty hack for starting vms
+  copy:
+    src: "{{ conf_root }}/bhyve/vm_start_hax.sh"
+    dest: "/root/bin/"
+    mode: "0750"
+    owner: "root"
+    group: "wheel"
+
+# vim: set ts=2 sw=2 tw=80 ft=yaml :

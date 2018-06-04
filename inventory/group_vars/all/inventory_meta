@@ -1,0 +1,5 @@
+---
+conf_root: "/home/tom/host_conf"
+stem_root: "{{ conf_root }}/stem"
+
+# vim: set ts=2 sw=2 tw=80 filetype=yaml :

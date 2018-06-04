@@ -1,0 +1,15 @@
+---
+
+ipv4_portable_prefixes:
+  - "10.123.0.0/24"
+ipv4_portable_internal_routes:
+  - "10.123.0.0/25"
+  - "10.123.0.128/25"
+
+ipv6_portable_prefixes:
+  - "fd00:7b::/48"
+ipv6_portable_internal_routes:
+  - "fd00:7b::/49"
+  - "fd00:7b:0:8000::/49"
+
+# vim: set ts=2 sw=2 tw=80 ft=yaml :

@@ -1,0 +1,30 @@
+---
+# Deploy loader.conf, trying to hit the common cases.
+# 1.) A loader.conf in the host tree
+# 2.) A loader.conf in the stem tree
+
+- name: Copy host loader.conf
+  when:
+    - loader_conf is defined
+    - loader_conf == 'host'
+  copy:
+    src: "{{ host_conf }}/boot/loader.conf"
+    dest: "/boot/loader.conf"
+    mode: "0644"
+    owner: "root"
+    group: "wheel"
+    backup: yes
+
+- name: Copy stem loader.conf
+  when:
+    - loader_conf is defined
+    - loader_conf == 'stem'
+  copy:
+    src: "{{ stem_root }}/boot/loader.conf"
+    dest: "/boot/loader.conf"
+    mode: "0644"
+    owner: "root"
+    group: "wheel"
+    backup: yes
+
+# vim: set ts=2 sw=2 tw=80 ft=yaml :

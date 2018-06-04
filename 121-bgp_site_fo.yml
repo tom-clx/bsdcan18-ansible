@@ -1,0 +1,84 @@
+---
+# This playbook is used to manage the BGP aspect of site-failover. Use with
+# caution, this playbook will cause significant chaos. To try and prevent
+# mistakes, this playbook fails safe. Running it without specific options causes
+# failure.
+#
+# Example invocation:
+#   ansible-playbook 121-bgp_site_fo.yml -e "new_active_location=a" -e conf_bird=true
+#
+# * new_active_location (required): must be defined, and set to "a" or "b". Declares
+#   which site should be configured as active/production.
+# * conf_bird (optional): if set true, changes will be activated. By default,
+#   they are only staged.
+
+- hosts: as123-rt*
+
+  gather_facts: no
+
+  vars:
+
+    active_site_vars: "inventory/group_vars/as123/active_location"
+
+    bird_names:
+      - bird
+      - bird6
+
+    bird_clients:
+      - birdc
+      - birdc6
+
+  tasks:
+
+    - name: Check for new_active_location declaration
+      when: new_active_location is not defined or (new_active_location != 'a' and new_active_location != 'b')
+      fail: msg="new_active_location must be specified. BE CAREFUL!"
+
+    - name: Confirm location paramters
+      debug:
+        msg: "Router location: {{ location }}, Active location (inv.): {{ active_location }}, Requested f/o site: {{ new_active_location }}"
+
+    - name: Confirm config activation
+      when:
+        - conf_bird is defined
+        - conf_bird
+      debug:
+        msg: "conf_bird is set; changes will be activated!"
+
+    - name: Pause for a sanity check
+      pause:
+        prompt: "STOP and review the above information before proceeding!"
+
+    - name: Template bird config files.
+      with_items: "{{ bird_names }}"
+      template:
+        src: "{{ stem_root }}/usr/local/etc/{{ item }}.conf"
+        dest: "/usr/local/etc/{{ item }}.conf"
+        backup: yes
+      notify:
+        - reload birds
+
+    - name: Update vars file for location change
+      when: new_active_location != active_location
+      run_once: True
+      connection: local
+      lineinfile:
+        path: "{{ active_site_vars }}"
+        regexp: "^active_location:"
+        line: "active_location: \"{{ new_active_location }}\""
+      notify:
+        - scream loudly
+
+
+  handlers:
+
+    - name: reload birds
+      when: conf_bird is defined and conf_bird
+      with_items: "{{ bird_clients }}"
+      command: "{{ item }} conf"
+
+    - name: scream loudly
+      debug:
+        msg: "WARNING! active_location has been updated in {{ active_site_vars }}"
+
+# vim: set ts=2 sw=2 tw=80 ft=yaml :

@@ -1,0 +1,29 @@
+---
+
+- name: Touch log files
+  with_items:
+    - "all.log"
+    - "console.log"
+  file:
+    path: "/var/log/{{ item }}"
+    state: touch
+  notify:
+    - "Restart syslogd"
+
+- name: Template host syslog.conf
+  copy:
+    src: "{{ stem_root }}/etc/syslog.conf"
+    dest: "/etc/syslog.conf"
+    backup: yes
+    mode: "0644"
+    owner: "root"
+    group: "wheel"
+  notify:
+    - "Restart syslogd"
+
+- name: Ensure syslog running
+  service:
+    name: syslogd
+    state: started
+
+# vim: set ts=2 sw=2 tw=80 ft=yaml :

@@ -1,0 +1,30 @@
+---
+# This is intended to be the master bird role. However, there will be at least
+# one other bird role. This is because we need to template the configuration in
+# stem cells before we launch them, and the remote chroot concept (or lack
+# thereof) will prevent doing things like verifying that bird is installed.
+
+- name: Install Bird
+  with_items:
+    - "bird"
+    - "bird6"
+  pkgng:
+    name: "{{ item }}"
+    state: present
+
+- name: Template bird configuration
+  include_role:
+    name: bird_conf
+
+# NOTE: rcvars are not set by this role. They should be templated by the rc_conf
+# role. That doesn't prevent us from starting the daemons here.
+
+- name: Make sure BIRD is running
+  with_items:
+    - "bird"
+    - "bird6"
+  service:
+    name: "{{ item }}"
+    state: started
+
+# vim: set ts=2 sw=2 tw=80 ft=yaml :

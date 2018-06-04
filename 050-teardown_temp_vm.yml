@@ -1,0 +1,57 @@
+---
+
+- hosts: bhyve_guests
+  gather_facts: no
+  strategy: free
+
+  tasks:
+
+  - name: Preflight checks
+    assert:
+      that:
+        - vm_root is defined
+        - bhyve_host is defined
+        - src_snap is defined
+        - bhyve_keep is not defined
+
+  - name: Stat the vmm path
+    delegate_to: "{{ bhyve_host }}"
+    failed_when: false
+    register: vmm
+    stat:
+      path: "/dev/vmm/{{ inventory_hostname }}"
+
+  - name: Stop running vm
+    delegate_to: "{{ bhyve_host }}"
+    when:
+      - vmm.stat.exists is defined
+      - vmm.stat.exists
+    command: "vm stop {{ inventory_hostname }}"
+
+  - name: Wait for shutdown
+    delegate_to: "{{ bhyve_host }}"
+    wait_for:
+      path: "/dev/vmm/{{ inventory_hostname }}"
+      state: absent
+
+  - name: Find out if guest path exists
+    register: create_vm_root
+    delegate_to: "{{ bhyve_host }}"
+    failed_when: false
+    changed_when: false
+    command: "zfs list {{ vm_root }}/{{ inventory_hostname }}"
+
+  - name: Destroy the entire zfs tree for vm
+    when: create_vm_root.rc == 0
+    delegate_to: "{{ bhyve_host }}"
+    command: "zfs destroy -r {{ vm_root }}/{{ inventory_hostname }}"
+
+  - name: Cleanup any stray directory for vm
+    #when: create_vm_root.rc == 0
+    delegate_to: "{{ bhyve_host }}"
+    file:
+      path: "/{{ vm_root }}/{{ inventory_hostname }}"
+      state: absent
+
+
+# vim: set ts=2 sw=2 tw=80 ft=yaml :

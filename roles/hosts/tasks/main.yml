@@ -1,0 +1,12 @@
+---
+
+- name: Template stem cell hosts
+  template:
+    src: "{{ stem_root }}/etc/hosts"
+    dest: "{{ dst_pfx|default('') }}/etc/hosts"
+    backup: yes
+    mode: "0644"
+    owner: "root"
+    group: "wheel"
+
+# vim: set ts=2 sw=2 tw=80 ft=yaml :

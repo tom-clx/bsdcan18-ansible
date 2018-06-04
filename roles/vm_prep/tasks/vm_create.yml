@@ -1,0 +1,71 @@
+---
+
+- name: Create guest zfs path
+  delegate_to: "{{ bhyve_host }}"
+  command: "zfs create {{ vm_root }}/{{ inventory_hostname }}"
+
+- name: Clone the stem cell zfs
+  delegate_to: "{{ bhyve_host }}"
+  command: "zfs clone {{ vm_root }}/{{ src_snap }} {{ vm_root }}/{{ inventory_hostname }}/disk0"
+
+- name: Mount the zfs at a temporary path
+  delegate_to: "{{ bhyve_host }}"
+  command: "zpool import -fR /tmp/{{ inventory_hostname }} -d /dev/zvol/{{ vm_root }}/{{ inventory_hostname }} zroot_stem zroot_{{ inventory_hostname }}"
+
+# This block is used to clean-up to guest zpool mount, regardless of success.
+- block:
+
+  - name: Mount the guest root
+    delegate_to: "{{ bhyve_host }}"
+    command: "zfs mount zroot_{{ inventory_hostname }}/ROOT/default"
+  
+  - name: Set a temp fact so we can operate on the temp path
+    set_fact:
+      dst_pfx: "/tmp/{{ inventory_hostname }}"
+
+  - name: BIRD bootstrap tasks
+    when: "'birdies' in group_names"
+    delegate_to: "{{ bhyve_host }}"
+    import_tasks: vm_bird.yml
+
+  - name: Generate the bird.conf files
+    when: "'birdies' in group_names"
+    delegate_to: "{{ bhyve_host }}"
+    import_role:
+      name: bird_conf
+
+  - name: Generate the pf.conf files
+    when: "'pf' in group_names"
+    delegate_to: "{{ bhyve_host }}"
+    import_role:
+      name: pf
+
+  - name: Execute the rc.conf role in the context of the bhyve host
+    delegate_to: "{{ bhyve_host }}"
+    import_role:
+      name: rc_conf
+
+  - name: Execute the resolv.conf role in the context of the bhyve host
+    delegate_to: "{{ bhyve_host }}"
+    import_role:
+      name: resolv_conf
+
+  - name: Execute the hosts role in the context of the bhyve host
+    delegate_to: "{{ bhyve_host }}"
+    import_role:
+      name: hosts
+  
+  always:
+  
+  # FIXME: It is worth noting that this does not run if one of the included
+  # roles (above) barfs. I'm not sure of a good way to handle this yet.
+  - name: Unmount the temp path
+    delegate_to: "{{ bhyve_host }}"
+    command: "zpool export zroot_{{ inventory_hostname }}"
+
+- name: Reset any temp facts
+  set_fact:
+    dst_pfx: ""
+    new_vm: True
+
+# vim: set ts=2 sw=2 tw=80 ft=yaml :

@@ -1,0 +1,39 @@
+---
+
+ansible_host: 10.70.0.16
+host_conf: "{{ conf_root }}/pzbhyve"
+allowed_users:
+  - "tom"
+
+loader_conf: "host"
+rc_conf: "host"
+sysctl_conf: "host"
+
+dns_main_if: "bge0"
+
+network:
+  netif:
+    - name: "bge0"
+      host_br: "bridge0"
+      ipv4_addr: "10.70.0.16"
+      ipv4_plen: "23"
+  ipv4_defgw: "10.70.0.1"
+  vm_switches:
+    - name: "gateway"
+    - name: "as50corea"
+    - name: "as50coreb"
+    - name: "ptp0"
+    - name: "ptp1"
+    - name: "ptp2"
+    - name: "ptp3"
+    - name: "ptp4"
+    - name: "ptp5"
+    - name: "ptp6"
+    - name: "ptp7"
+    - name: "ptp8"
+    - name: "as123-sw1"
+    - name: "as123-sw2"
+    - name: "as123-sw3"
+    - name: "as123-sw4"
+
+# vim: set ts=2 sw=2 tw=80 ft=yaml :

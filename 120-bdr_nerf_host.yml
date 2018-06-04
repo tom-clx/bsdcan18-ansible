@@ -1,0 +1,24 @@
+---
+# This playbook is used to deprioritize all eBGP instances on a border router.
+# To make it do the dangerous things you may want, you need to supply it with
+# explicit variable 'nerf_target', and optionally 'nerf_me', 'conf_bird'.
+#
+# An example invocation is below.
+#
+#   ansible-playbook 120-bdr_nerf_host.yml --extra-vars "nerf_target=bdr-2b nerf_me=true"
+#
+# * nerf_target must be set to a single host for the playbook to do anything.
+# * nerf_me indicates to the playbook that the deprioritized plays should run.
+# * conf_bird indicates that the playbook should reconfigure running birds.
+
+- hosts: "{{ nerf_target }}"
+
+  gather_facts: no
+
+  vars:
+    nerf_flag: True
+
+  roles:
+    - { role: bird_conf, tags: bird }
+
+# vim: set ts=2 sw=2 tw=80 ft=yaml :

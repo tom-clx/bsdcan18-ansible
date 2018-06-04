@@ -1,0 +1,54 @@
+---
+
+ansible_connection: local
+host_conf: "{{ conf_root }}/pzansible"
+allowed_users:
+  - "tom"
+
+# Bhyve guest configuration
+bhyve_cpu: "4"
+bhyve_ram: "1024M"
+bhyve_keep: True
+
+# TODO: Maybe this could be a list?
+loader_conf: "stem"
+rc_conf: "stem"
+
+ipv4_loopback: "10.70.35.3"
+ipv6_loopback: "fd00:20:ffff::3"
+
+network:
+  netif:
+    - name: "lo1"
+      clone: True
+      ipv4_addr: "{{ ipv4_loopback }}"
+      ipv4_plen: "32"
+      ipv6_addr: "{{ ipv6_loopback }}"
+      ipv6_plen: "128"
+      ospf: "stub"
+    - name: "vtnet0"
+      index: 0
+      host_switch: "lan"
+      ipv4_addr: "10.70.0.18"
+      ipv4_plen: "23"
+      ospf: "stub"
+    - name: "vtnet1"
+      index: 1
+      host_switch: "gateway"
+      ipv4_addr: "10.70.32.3"
+      ipv4_plen: "24"
+      ipv6_addr: "fd00:20::3"
+      ospf: "normal"
+  ipv4_defgw: "10.70.0.1"
+  bird:
+    asn: "99999"
+    bgp:
+      ibgp_sessions:
+        - name: "ibgp_rt01"
+          neighborip6: "fd00:20:ffff::2"
+          neighborip4: "10.70.35.2"
+        - name: "ibgp_pzgateway"
+          neighborip6: "fd00:20:ffff::1"
+          neighborip4: "10.70.35.1"
+
+# vim: set ts=2 sw=2 tw=80 ft=yaml :

@@ -1,0 +1,93 @@
+---
+# These tasks are oriented towards adding and managing permitted users. The
+# role should be filled out with tasks for disabling and removing accounts.
+
+- name: Sanity check
+  assert:
+    that:
+      - ansible_root_pubkey is defined
+      - user_accounts.tom.pubkeys is defined
+      - user_conf_path is defined
+
+- name: Manage root account
+  user:
+    name: "root"
+    shell: "/bin/sh"
+    state: present
+
+- name: Manage root authorized_keys
+  authorized_key:
+    state: present
+    user: "root"
+    exclusive: yes
+    key: "{{ user_accounts.tom.pubkeys|join('\n') }}\n{{ ansible_root_pubkey }}"
+    # This is valid so long as I am the only administrator!
+
+- name: Push root config bundle
+  synchronize:
+    src: "{{ user_conf_path }}/root/"
+    dest: "/root/"
+    checksum: yes
+    recursive: yes
+    times: no
+    links: yes
+    group: yes
+    owner: yes
+    perms: yes
+    verify_host: yes
+    rsync_opts:
+    - "--prune-empty-dirs"
+    - "--chown=root:wheel"
+    - "--chmod=u=rwX"
+    - "--chmod=go="
+
+- name: Create users on hosts
+  with_dict: "{{ user_accounts|default([]) }}"
+  when:
+    - allowed_users is defined
+    - item.key in allowed_users
+  user:
+    state: present
+    name: "{{ item.key }}"
+    uid: "{{ item.value.uid }}"
+    comment: "{{ item.value.real_name }}"
+    shell: "{{ item.value.shell | default(omit) }}"
+
+- name: Manage authorized_keys files
+  with_dict: "{{ user_accounts|default([]) }}"
+  when:
+    - allowed_users is defined
+    - item.key in allowed_users
+    - item.value.pubkeys is defined
+  authorized_key:
+    state: present
+    exclusive: yes
+    user: "{{ item.key }}"
+    key: "{{ item.value.pubkeys|join('\n') }}"
+
+- name: Push user config bundle
+  with_dict: "{{ user_accounts|default([]) }}"
+  when:
+    - allowed_users is defined
+    - item.key in allowed_users
+    - item.value.push_config_dir is defined
+    - item.value.push_config_dir
+  synchronize:
+    src: "{{ user_conf_path }}/{{ item.key }}/"
+    dest: "/home/{{ item.key }}/"
+    checksum: yes
+    recursive: yes
+    times: no
+    links: yes
+    group: yes
+    owner: yes
+    perms: yes
+    verify_host: yes
+    rsync_opts:
+    - "--prune-empty-dirs"
+    - "--chown={{ item.key }}:{{ item.key }}"
+    - "--chmod=u=rwX"
+    - "--chmod=go="
+
+
+# vim: set ts=2 sw=2 tw=80 ft=yaml :

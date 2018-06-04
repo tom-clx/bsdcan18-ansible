@@ -1,0 +1,42 @@
+---
+
+host_conf: "{{ conf_root }}/rt01"
+allowed_users:
+  - "tom"
+
+loader_conf: "stem"
+rc_conf: "stem"
+
+ipv4_loopback: "10.123.2.3"
+ipv6_loopback: "fd00:7b:2::3"
+ansible_host: "{{ ipv6_loopback }}"
+
+network:
+  netif:
+    - name: "lo1"
+      clone: True
+      ipv4_addr: "{{ ipv4_loopback }}"
+      ipv4_plen: "32"
+      ipv6_addr: "{{ ipv6_loopback }}"
+      ipv6_plen: "128"
+      ospf: "stub"
+    - name: "vtnet0"
+      index: 0
+      ipv4_addr: "10.123.2.12"
+      ipv4_plen: "29"
+      host_switch: "as123-sw2"
+      ipv6_addr: "fd00:7b:2:8::12"
+      ospf: "normal"
+    - name: "vtnet1"
+      index: 1
+      ipv4_addr: "10.123.2.17"
+      ipv4_plen: "29"
+      host_switch: "as123-sw4"
+      ipv6_addr: "fd00:7b:2:16::"
+      ospf: "normal"
+  bird:
+    asn: "123"
+  ipv4_defgw: "10.123.2.9"
+  ipv6_defgw: "fd00:7b:2:8::9"
+
+# vim: set ts=2 sw=2 tw=80 ft=yaml :

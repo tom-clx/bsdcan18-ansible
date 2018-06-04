@@ -1,0 +1,58 @@
+---
+
+- name: Preflight checks
+  assert:
+    that:
+      - vm_root is defined
+      - bhyve_host is defined
+      - src_snap is defined
+
+- name: Find out if guest path exists
+  register: create_vm_root
+  delegate_to: "{{ bhyve_host }}"
+  failed_when: false
+  changed_when: create_vm_root.rc != 0
+  command: "zfs list {{ vm_root }}/{{ inventory_hostname }}"
+
+# If the task above changed, it indicates that the vm has not yet been
+# initialized. We can key on this to do init tasks.
+- name: Do vm initialization things
+  when: create_vm_root.rc != 0
+  delegate_to: "{{ bhyve_host }}"
+  include_tasks: "vm_create.yml"
+
+- name: Template stem VM config file
+  delegate_to: "{{ bhyve_host }}"
+  template:
+    src: "{{ conf_root }}/stem/.vm/guest.conf"
+    dest: "/{{ vm_root }}/{{ inventory_hostname }}/{{ inventory_hostname }}.conf"
+    backup: yes
+
+- name: Check that the VM is running
+  delegate_to: "{{ bhyve_host }}"
+  failed_when: false
+  register: vmm
+  stat:
+    path: "/dev/vmm/{{ inventory_hostname }}"
+
+- name: Start vm via shim
+  delegate_to: "{{ bhyve_host }}"
+  register: reg_vm_start
+  when:
+    - vmm.stat.exists is defined
+    - not vmm.stat.exists
+  command: "/root/bin/vm_start_hax.sh {{ inventory_hostname }}"
+
+- name: Wait for guest boot
+  connection: local
+  tags: slow
+  when:
+    - reg_vm_start is defined
+    - reg_vm_start is changed
+  wait_for:
+    delay: 10
+    timeout: 60
+    port: 22
+    host: "{{ ansible_host }}"
+
+# vim: set ts=2 sw=2 tw=80 ft=yaml :

@@ -1,0 +1,13 @@
+---
+
+bhyve_host: "pzbhyve"
+
+# This is the root of the bhyve tree on the hosts. Putting it in the guest
+# inventory because tasks associated with vm deployment will run in the context
+# of the guest.
+vm_root: "zroot/bhyve"
+
+# Guest VMs are cloned from this snapshot.
+src_snap: "base-11.1-RELEASE@stemcell-v10"
+
+# vim: set ts=2 sw=2 tw=80 ft=yaml :

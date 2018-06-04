@@ -1,0 +1,56 @@
+---
+# This role is intended to manage the specific needs of the bhyve host. There
+# is a lot of wonky output manipulation required to get the interfaces in the
+# correct state, so I will try to annotate the reasons why things happen the
+# way that they do.
+
+- name: Initialize empty lists
+  set_fact:
+    intf_pairs: []
+    tap_list: []
+
+- name: Generate list of host interface/bridge pairs
+  with_items: "{{ groups['all']|map('extract', hostvars, ['network','netif'])|list }}"
+  when:
+    - item.host_br is defined
+  set_fact:
+    intf_pairs: "{{ intf_pairs + [{'intf': item.host_if|default(item.name), 'bridge': item.host_br}] }}"
+
+- name: Generate list of tap interfaces that must exist
+  with_items: "{{ groups['all']|map('extract', hostvars, ['network','netif'])|list }}"
+  when:
+    - item.host_if is defined
+  set_fact:
+    tap_list: "{{ tap_list + [ item.host_if ] }}"
+
+- name: Get a list of bridges 
+  set_fact:
+    bridge_list: "{{intf_pairs|map(attribute='bridge')|list|unique}}"
+
+- name: Get list of configured bridges
+  with_items: "{{ bridge_list }}"
+  failed_when: false
+  register: bridge_state
+  command: /sbin/ifconfig {{ item }}
+
+- name: Get list of configured taps
+  with_items: "{{ tap_list }}"
+  failed_when: false
+  register: tap_state
+  command: /sbin/ifconfig {{ item }}
+
+#- name: Look for virtual interfaces that need to be created
+#  with_items:
+#    - "{{ bridge_state.results }}"
+#    - "{{ tap_state.results }}"
+#  when:
+#    - item.rc != 0
+#  debug:
+#    msg: "I should create {{ item.item }}"
+
+- name: Parse bridge results to create dictionary
+  with_items: "{{ bridge_state.results }}"
+  set_fact:
+    bridge_config_0: "{{ bridge_config_0|default({}) |combine({ item.item: item.stdout_lines }) }}"
+
+# vim: set ts=2 sw=2 tw=80 ft=yaml :

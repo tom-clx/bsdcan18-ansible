@@ -1,0 +1,20 @@
+---
+# This role handles the management of the basic system configuration files for
+# FreeBSD. Some care should be taken to prevent this from turning into a fetid
+# swamp, by splitting out discrete roles and include files as appropriate.
+
+- name: Call role to copy resolv.conf
+  include_role:
+    name: resolv_conf
+- include_tasks: pkgng.yml
+- include_tasks: boot_files.yml
+- name: Call role to template rc.conf
+  include_role:
+    name: rc_conf
+- name: Call role to template hosts file
+  include_role:
+    name: hosts
+- include_tasks: sysctl.yml
+- include_tasks: syslog.yml
+
+# vim: set ts=2 sw=2 tw=80 ft=yaml :

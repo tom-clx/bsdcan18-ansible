@@ -1,0 +1,27 @@
+---
+
+- name: Template stem cell rc.conf
+  when:
+    - rc_conf is defined
+    - rc_conf == 'stem'
+  template:
+    src: "{{ stem_root }}/etc/rc.conf"
+    dest: "{{ dst_pfx|default('') }}/etc/rc.conf"
+    backup: yes
+    mode: "0644"
+    owner: "root"
+    group: "wheel"
+
+- name: Template host rc.conf
+  when:
+    - rc_conf is defined
+    - rc_conf == 'host'
+  template:
+    src: "{{ host_conf }}/etc/rc.conf"
+    dest: "{{ dst_pfx|default('') }}/etc/rc.conf"
+    backup: yes
+    mode: "0644"
+    owner: "root"
+    group: "wheel"
+
+# vim: set ts=2 sw=2 tw=80 ft=yaml :

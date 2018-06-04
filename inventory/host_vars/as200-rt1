@@ -1,0 +1,75 @@
+---
+
+host_conf: "{{ conf_root }}/rt01"
+allowed_users:
+  - "tom"
+
+loader_conf: "stem"
+rc_conf: "stem"
+
+ipv4_loopback: "10.200.10.1"
+ipv6_loopback: "fd00:c8:a::1"
+ansible_host: "{{ ipv6_loopback }}"
+
+network:
+  netif:
+    - name: "lo1"
+      clone: True
+      ipv4_addr: "{{ ipv4_loopback }}"
+      ipv4_plen: "32"
+      ipv6_addr: "{{ ipv6_loopback }}"
+      ipv6_plen: "128"
+      ospf: "stub"
+    - name: "vtnet0"
+      index: 0
+      ipv4_addr: "10.100.0.6"
+      ipv4_plen: "30"
+      host_switch: "ptp3"
+      ipv6_addr: "fd00:64:3::6"
+      ospf: "stub"
+    - name: "vtnet1"
+      index: 1
+      ipv4_addr: "10.200.255.1"
+      ipv4_plen: "30"
+      host_switch: "ptp4"
+      ipv6_addr: "fd00:c8:ff00::"
+      ipv6_plen: "127"
+      ospf: "stub"
+    - name: "vtnet2"
+      index: 2
+      ipv4_addr: "10.200.255.5"
+      ipv4_plen: "30"
+      host_switch: "ptp5"
+      ipv6_addr: "fd00:c8:ff00:1::"
+      ipv6_plen: "127"
+      ospf: "stub"
+  bird:
+    asn: "200"
+    bgp:
+      transit_as: True
+      ipv4_static_prefixes:
+        - "10.200.0.0/16"
+      ipv6_static_prefixes:
+        - "fd00:c8::/32"
+      ipv4_ebgp_sessions:
+        - name: "bgp_as100"
+          neighborip: "10.100.0.5"
+          neighboras: "100"
+        - name: "bgp_as99999"
+          neighborip: "10.200.255.2"
+          neighboras: "99999"
+        - name: "bgp_as123"
+          neighborip: "10.200.255.6"
+          neighboras: "123"
+      ipv6_ebgp_sessions:
+        - name: "bgp_as100"
+          neighborip: "fd00:64:3::5"
+          neighboras: "100"
+        - name: "bgp_as99999"
+          neighborip: "fd00:c8:ff00::1"
+          neighboras: "99999"
+        - name: "bgp_as123"
+          neighborip: "fd00:c8:ff00:1::1"
+          neighboras: "123"
+
+# vim: set ts=2 sw=2 tw=80 ft=yaml :

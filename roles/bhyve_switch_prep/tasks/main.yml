@@ -1,0 +1,20 @@
+---
+# In the interest of simplicity, don't try to remove unspecified switches. Could
+# also be expanded to handle vlans, host interfaces, etc.
+
+- name: Get info for the list of switches
+  with_items: "{{ network.vm_switches }}"
+  register: switch_info
+  shell: "vm switch info {{ item.name }} | grep '(type\\|ident\\|vlan\\|nat\\|physical-ports):'"
+
+- name: Turn result list into a dictionary
+  with_items: "{{ switch_info.results }}"
+  set_fact:
+    switch_list: "{{ switch_list|default({})|combine({ item.item.name: {'ident': item.stdout_lines|join('#')|regex_search('.*ident: ([-\\d\\w]+)#.*','\\1')|join('') } }) }}"
+
+- name: Create switches that appear to be unconfigured
+  with_dict: "{{ switch_list }}"
+  when: item.value.ident == '-'
+  command: "vm switch create {{ item.key }}"
+
+# vim: set ts=2 sw=2 tw=80 ft=yaml :

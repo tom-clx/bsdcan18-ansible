@@ -1,0 +1,6 @@
+---
+
+# This should really be set per-protocol, but global is faster for the demo!
+bgp_hold_time: "12"
+
+# vim: set ts=2 sw=2 tw=80 filetype=yaml :
